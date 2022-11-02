@@ -1,0 +1,74 @@
+﻿@{
+    ViewData["Title"] = "Air quality app";
+}
+@model AirQuality.Domain.LatestMeasurements.LatestMeasurementsViewModel
+
+<div class="row mb-4">
+    <div class="col-12 text-center">
+        <form action="" method="post">
+            City: <input type="text" name="city" value="@Model.City" required/> <input type="submit" value="Get air quality"/>
+        </form>
+    </div>
+</div>
+
+@if (Model.IsPost)
+{
+    if (Model.IsSuccess)
+    {
+        <div class="row mt-4 mb-2">
+            <div class="col">
+                <h2>Results (@Model.Data.Results.Count) for city: @Model.City</h2>
+            </div>
+        </div>
+
+        if (Model?.Data?.Results != null && Model.Data.Results.Any())
+        {
+            <div class="row mt-4">
+                @foreach (var item in Model.Data.Results)
+                {
+                    <div class="col-lg-6 col-md-12 mb-4">
+                        
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">@item.City (@item.Country)</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">Location: @item.Location 
+                                    @if (item.Coordinates != null) {
+                                        @Html.Raw($"({@item.Coordinates?.Latitude}, {@item.Coordinates?.Longitude})")
+                                        }
+                                </h6>
+
+                                <ul class="list-group">
+                                    @foreach (var me in item.Measurements)
+                                    {
+                                        <li class="list-group-item">@me.Parameter : @me.Value @me.Unit, <small>(measured: @me.LastUpdated.ToString("f"))</small></li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col">
+                    <div class="alert alert-danger" role="alert">
+                        No data for city '@Model.City'. Try other city name, remember it's case sensitive'
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+       
+        <div class="row">
+            <div class="col">
+                <div class="alert alert-danger" role="alert">
+                    Sorry, we were not able to provide any results. Please try again later. Error: @Model.Error
+                </div>
+            </div>
+        </div>
+    }
+}
